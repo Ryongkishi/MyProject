@@ -117,7 +117,67 @@ int readfile(struct word*&head,char *txt)
 	}
 	return numofWord;
 }
+int stopreadfile(struct word*&head, char *txt, struct word*&stophead)
+{
+	FILE *fp;
+	if ((fp = fopen(txt, "r")) == NULL)
+	{
+		printf("无法打开此文件!\n");
+		exit(0);
+	}
+	char ch, temp[30];
+	int numofWord = 0;
+	struct word *p,*stop_p;
+	while (!feof(fp))
+	{
+		int i = 0;
+		ch = fgetc(fp);
+		temp[0] = ' ';
+		while ((ch >= 'a'&&ch <= 'z') || (ch >= 'A'&&ch <= 'Z') || temp[0] == ' ')
+		{
+			if (ch >= 'a'&&ch <= 'z' || ch >= 'A'&&ch <= 'Z')
+			{
+				temp[i] = ch;
+				i++;
+			}
+			ch = fgetc(fp);
+			if (feof(fp)) break;
+		}
+		temp[i] = '\0';
+		p = head->next;
+		stop_p = stophead->next;
+		while (p)
+		{
+			if (!_stricmp(temp, p->name))
+			{
+				p->num++; break;
+			}
 
+			p = p->next;
+		}
+		int flag = 1;
+		while (stop_p)
+		{
+			if (_stricmp(stop_p->name, temp))
+			{
+				flag = 0;
+			}
+
+				stop_p = stop_p->next;
+		}
+		if (!p&&temp[0] != '\0&&'&&flag)
+		{
+			p = new word;
+			strcpy(p->name, temp);
+			p->num = 1;
+			p->next = head->next;
+			head->next = p;
+			numofWord++;
+			flag = 1;
+		}
+	}
+	return numofWord;
+}
 void sort1(struct word*&head,int n)
 {
 	struct word *q;
@@ -154,9 +214,11 @@ void sort1(struct word*&head,int n)
 
 int main(int   argc, char*   argv[])
 {
-	struct word *head;
+	struct word *head,*stopfilehead;
 	head = new word;
+	stopfilehead = new word;
 	head->next = NULL;
+	stopfilehead->next = NULL;
 	if(strcmp(argv[1],"-c") == 0)
 			numberoftheword(argv[2]);
 	if (strcmp(argv[1], "-f") == 0)
@@ -188,6 +250,11 @@ int main(int   argc, char*   argv[])
 		if (strcmp(argv[2], "-s") == 0)
 			cout << "目录下的子文件已处理" << endl;
 	}
-
+	if (strcmp(argv[1], "-x") == 0)
+	{
+		int stop_num = readfile(stopfilehead, argv[2]);
+		int num_x = stopreadfile(head, argv[4], stopfilehead);
+		sort1(head, num_x);
+	}
 	//cout << 0 << endl;
 }
