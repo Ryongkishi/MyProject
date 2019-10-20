@@ -14,6 +14,7 @@ struct word {
 	char name[30];
 	int num;
 	struct word *next;
+	struct word *children;
 };
 bool cmp(numberWord a, numberWord b)
 {
@@ -67,6 +68,60 @@ void numberoftheword(char *txt)
 		
 	}
 }
+int readfileLimtiedby(struct word*&head, char *txt,int Lim_num)
+{
+	FILE *fp;
+	if ((fp = fopen(txt, "r")) == NULL)
+	{
+		printf("无法打开此文件!\n");
+		exit(0);
+	}
+	char ch, temp[30];
+	int numofWord = 0;
+	struct word *p;
+	while (!feof(fp))
+	{
+		int i = 0;
+		ch = fgetc(fp);
+		temp[0] = ' ';
+		while ((ch >= 'a'&&ch <= 'z') || (ch >= 'A'&&ch <= 'Z') || temp[0] == ' ')
+		{
+			if (ch >= 'a'&&ch <= 'z' || ch >= 'A'&&ch <= 'Z')
+			{
+				temp[i] = ch;
+				i++;
+			}
+			ch = fgetc(fp);
+			if (feof(fp)) break;
+		}
+		temp[i] = '\0';
+		int flag = 1;
+		p = head->next;
+		while (p)
+		{
+			if (!_stricmp(temp, p->name))
+			{
+				p->num++; break;
+			}
+
+			p = p->next;
+		}
+		if (strlen(temp) == Lim_num)
+		{
+			flag = 0;
+		}
+		if (!p&&temp[0] != '\0'&&flag)
+		{
+			p = new word;
+			strcpy(p->name, temp);
+			p->num = 1;
+			p->next = head->next;
+			head->next = p;
+			numofWord++;
+		}
+	}
+	return numofWord;
+}
 int readfile(struct word*&head,char *txt)
 {
 	FILE *fp;
@@ -83,6 +138,62 @@ int readfile(struct word*&head,char *txt)
 		int i = 0;
 		ch = fgetc(fp);
 		temp[0] = ' ';
+		while ((ch >= 'a'&&ch <= 'z') || (ch >= 'A'&&ch <= 'Z') || temp[0] == ' ')
+		{
+			if (ch >= 'a'&&ch <= 'z' || ch >= 'A'&&ch <= 'Z')
+			{
+				temp[i] = ch;
+				i++;
+			}
+			ch = fgetc(fp);
+			if (feof(fp)) break;
+		}
+		temp[i] = '\0';
+
+		p = head->next;
+		while (p)
+		{
+			if (!_stricmp(temp, p->name))
+			{
+				p->num++; break;
+			}
+
+			p = p->next;
+		}
+		if (!p&&temp[0] != '\0')
+		{
+			p = new word;
+			strcpy(p->name, temp);
+			p->num = 1;
+			p->next = head->next;
+			head->next = p;
+			numofWord++;
+		}
+	}
+	return numofWord;
+}
+int Vreadfile(struct word*&head, char *txt)
+{
+	FILE *fp;
+	if ((fp = fopen(txt, "r")) == NULL)
+	{
+		printf("无法打开此文件!\n");
+		exit(0);
+	}
+	char ch, temp[30];
+	int numofWord = 0;
+	struct word *p;
+	while (!feof(fp))
+	{
+		int i = 0;
+		ch = fgetc(fp);
+		temp[0] = ' ';
+		if (temp[i] == '\n')
+		{
+			p = new word;
+			p->children = head->children;
+			head->children = p;
+		}
 		while ((ch >= 'a'&&ch <= 'z') || (ch >= 'A'&&ch <= 'Z') || temp[0] == ' ')
 		{
 			if (ch >= 'a'&&ch <= 'z' || ch >= 'A'&&ch <= 'Z')
@@ -173,7 +284,6 @@ int stopreadfile(struct word*&head, char *txt, struct word*&stophead)
 			p->next = head->next;
 			head->next = p;
 			numofWord++;
-			flag = 1;
 		}
 	}
 	return numofWord;
@@ -256,5 +366,27 @@ int main(int   argc, char*   argv[])
 		int num_x = stopreadfile(head, argv[4], stopfilehead);
 		sort1(head, num_x);
 	}
+	if (strcmp(argv[1], "-p") == 0)
+	{
+			//strcpy(nvalue, );
+			int temp = 0, weishu = 0;
+			for (int i = 0; argv[2][i] != NULL; i++)
+			{
+				weishu++;
+			}
+			for (int i = weishu - 1, j = 0; i >= 0; i--, j++)
+			{
+				temp += (argv[2][i] - '0')* pow(10, j);
+			}
+			int num = readfileLimtiedby(head, argv[4], temp);
+			//cout << temp << endl;
+			sort1(head, num);
+	}
+	//if (strcmp(argv[1], "-v") == 0)
+	//{
+	//	int v_num = readfile(stopfilehead, argv[2]);
+	//	int num_x = stopreadfile(head, argv[4], stopfilehead);
+	//	sort1(head, num_x);
+	//}
 	//cout << 0 << endl;
 }
